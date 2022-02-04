@@ -3,7 +3,8 @@ import { Container, TransactionTypeContainer, RadioBox } from "./style";
 import incomeImg from "../../assets/income.svg";
 import outcomeImg from "../../assets/outcome.svg";
 import closeImg from "../../assets/close.svg";
-import { useState } from "react";
+import { FormEvent, useState } from "react";
+import { api } from "../../services/api";
 
 interface TransactionModalProps {
   isOpen: boolean;
@@ -14,7 +15,18 @@ export function TransactionModal({
   isOpen,
   onRequestClose,
 }: TransactionModalProps) {
-  const [type, setType] = useState("deposit");
+  const [titulo, setTitulo] = useState("");
+  const [valor, setValor] = useState(0);
+  const [categoria, setCategoria] = useState("");
+
+  const [tipo, setTipo] = useState("deposit");
+
+  function handleCreateNewTransaction(event: FormEvent) {
+    event.preventDefault();
+
+    const data = { titulo, valor, categoria, tipo };
+    api.post("/transactions", data);
+  }
 
   return (
     <>
@@ -32,17 +44,27 @@ export function TransactionModal({
           <img src={closeImg} alt="Fechar Modal" />
         </button>
 
-        <Container>
+        <Container onSubmit={handleCreateNewTransaction}>
           <h2>Cadastrar Transação</h2>
-          <input type="text" placeholder="Titulo" />
-          <input type="number" placeholder="Valor" />
+          <input
+            type="text"
+            placeholder="Titulo"
+            value={titulo}
+            onChange={(event) => setTitulo(event.target.value)}
+          />
+          <input
+            type="number"
+            placeholder="Valor"
+            value={valor}
+            onChange={(event) => setValor(Number(event.target.value))}
+          />
 
           <TransactionTypeContainer>
             <RadioBox
               type="button"
-              isActive={type == "deposit"}
-              Type={type}
-              onClick={() => setType("deposit")}
+              isActive={tipo == "deposit"}
+              Type={tipo}
+              onClick={() => setTipo("deposit")}
             >
               <img src={incomeImg} alt="Entrada" />
               <span>Entrada</span>
@@ -50,15 +72,21 @@ export function TransactionModal({
 
             <RadioBox
               type="button"
-              isActive={type == "withdraw"}
-              Type={type}
-              onClick={() => setType("withdraw")}
+              isActive={tipo == "withdraw"}
+              Type={tipo}
+              onClick={() => setTipo("withdraw")}
             >
               <img src={outcomeImg} alt="Saida" />
               <span>Saída</span>
             </RadioBox>
           </TransactionTypeContainer>
-          <input type="number" placeholder="Categoria" />
+
+          <input
+            type="text"
+            placeholder="Categoria"
+            value={categoria}
+            onChange={(event) => setCategoria(event.target.value)}
+          />
           <button type="submit">Cadastrar</button>
         </Container>
       </Modal>
